@@ -2,6 +2,8 @@
 
 #include <string.h> // for testing generate_splits()
 
+#include <stdio.h>
+
 /*
  * Generate k-selections of a[0..n-1] in lexicographic order and call process_selection to process them.
  *
@@ -10,21 +12,53 @@
  * Selections should be generated in lexicographic order.
  * a[0..k-1] is the smallest selection and a[n-k..n-1] is the largest.
  */
+
+
+void process_selection(int *b, int k, void *data) {
+    for (int i=0; i<k; i++) {
+        printf("%d ",b[i]);
+    }
+    printf("\n");
+}
 void generate_selections(int a[], int n, int k, int b[], void *data, void (*process_selection)(int *b, int k, void *data))
 {
-    b[0] = 2; b[1] = 1;
-    process_selection(b, 2, data);
-    b[0] = 2; b[1] = 6;
-    process_selection(b, 2, data);
-    b[0] = 2; b[1] = 5;
-    process_selection(b, 2, data);
-    b[0] = 1; b[1] = 6;
-    process_selection(b, 2, data);
-    b[0] = 1; b[1] = 5;
-    process_selection(b, 2, data);
-    b[0] = 6; b[1] = 5;
-    process_selection(b, 2, data);
+    if (k==0) {
+        process_selection(b,k,data);
+        return;
+    }
+
+    int indices[k];
+    for (int i=0; i<k;i++) {
+        indices[i]=i;
+    }
+
+    int c = 0;
+    while (!c) {
+        for (int i=0; i<k;i++) {
+            b[i]=a[indices[i]];
+        }
+
+        process_selection(b,k,data);
+
+
+        int j=k-1;
+        while(j>=0 && indices[j]==n-k+j){
+            j--;
+        }
+
+        if (j<0){
+            c=1; 
+        } else {
+            indices[j]++;
+            for (int l=j+1;l<k;l++){
+                indices[l]=indices[l-1]+1;
+            }
+        }
+    }
 }
+
+
+
 
 /*
  * See Exercise 2 (a), page 94 in Jeff Erickson's textbook.
@@ -48,13 +82,35 @@ void generate_splits(const char *source, const char *dictionary[], int nwords, c
  */
 void previous_permutation(int a[], int n)
 {
-    a[0] = 1;
-    a[1] = 5;
-    a[2] = 4;
-    a[3] = 6;
-    a[4] = 3;
-    a[5] = 2;
+    int p =n-2;
+    while(p>=0 && a[p]<=a[p+1]){
+        p--;
+    }
+
+    if(p>0){
+        int q = n-1;
+        while(a[q] >= a[p]){
+            q--;
+        }
+
+        int upd = a[p];
+        a[p]=a[q];
+        a[q]=upd;
+    }
+    if(p>0){
+        int l=p+1;
+        int r=n-1;
+
+        while(l<r){ 
+            int upd=a[l];
+            a[l]=a[r];
+            a[r]=upd;
+            l++;
+            r--;
+        }
+    }
 }
+
 
 /* Write your tests here. Use the previous assignment for reference. */
 
